@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -56,6 +57,8 @@ public class NotaController {
 
     @DeleteMapping("{id}")
     public void deletar(@PathVariable Integer id){
+        //notaRepository.delete(notaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nota não encontrada")));
+
         notaRepository.findById(id).map(
                 nota -> {
                     notaRepository.delete(nota);
@@ -63,5 +66,35 @@ public class NotaController {
                 }
         ).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nota não cadastrada!"));
     }
+
+    @PutMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void atualizar(@PathVariable Integer id, @RequestBody NotaDTO dadoAtualizado){
+
+        LocalDate dataNota = LocalDate.parse(
+                dadoAtualizado.getDataNota(), DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        );
+
+        //BigDecimal valorDaNota = bigDecimalConverter(dadoAtualizado.getNota());
+
+        Integer idAluno = dadoAtualizado.getIdAluno();
+        Aluno alunoDoBanco = alunoRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "O aluno não existe!"));
+
+        Integer idDisciplina = dadoAtualizado.getIdDisciplina();
+        Disciplina disciplinaDoBanco = disciplinaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "A disciplina não existe!"));
+
+        notaRepository.findById(id).map(
+                nota -> {
+                    nota.setNota(bigDecimalConverter.converter(dadoAtualizado.getNota()));
+                    nota.setDataNota(dataNota);
+                    nota.setAluno(alunoDoBanco);
+                    nota.setDisciplina(disciplinaDoBanco);
+                    return notaRepository.save(nota);
+                }
+        ).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "A nota não existe em nossa app!"));
+
+    }
+
+
 
 }
