@@ -11,6 +11,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/alunos")
+@CrossOrigin("http://localhost:4200")
 public class AlunoController {
 
     private final AlunoRepository repository;
